@@ -22,6 +22,8 @@ from verl.utils.logger.aggregate_logger import DecoratorLoggerBase
 
 
 def _get_current_mem_info(unit: str = "GB", precision: int = 2) -> Tuple[str]:
+    # FIXME:
+    # torch reserves too much memory, correct torch behavior
     """Get current memory usage."""
     assert unit in ["GB", "MB", "KB"]
     divisor = 1024**3 if unit == "GB" else 1024**2 if unit == "MB" else 1024
@@ -44,7 +46,7 @@ def log_gpu_memory_usage(head: str, logger: logging.Logger = None, level=logging
         mem_allocated, mem_reserved, mem_used, mem_total = _get_current_mem_info()
         message = f"{head}, memory allocated (GB): {mem_allocated}, memory reserved (GB): {mem_reserved}, device memory used/total (GB): {mem_used}/{mem_total}"
 
-        if logger is None:
+        if True:
             print(message)
         else:
             logger.log(msg=message, level=level)
