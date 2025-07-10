@@ -2,8 +2,8 @@ data:
   train_batch_size: 64
   micro_batch_size: null # will be deprecated, use micro_batch_size_per_gpu
   micro_batch_size_per_gpu: 1  # this is also val batch size
-  train_files: /home/fit/wanghn/WORK/liguchan/datasets/kimina_SFT_train.jsonl
-  val_files: /home/fit/wanghn/WORK/liguchan/datasets/kimina_SFT_val.jsonl
+  train_files: /workspace/sft/kimina_SFT_train.jsonl
+  val_files: /workspace/sft/kimina_SFT_val.jsonl
   # Multi-turn settings
   multiturn:
     enable: false  # Set to true to use multi-turn dataset
@@ -16,7 +16,7 @@ data:
     path: null
     name: null
 model:
-  partial_pretrain: /home/fit/wanghn/WORK/liguchan/models/kimina-7b
+  partial_pretrain: /workspace/sft/kimina-7b
   fsdp_config:
     wrap_policy:
       min_num_params: 0
@@ -39,7 +39,7 @@ optim:
 ulysses_sequence_parallel_size: 4
 use_remove_padding: True
 trainer:
-  default_local_dir: /home/fit/wanghn/WORK/liguchan/checkpoints
+  default_local_dir: /workspace/sft/checkpoints
   default_hdfs_dir: null
   resume_path: null
   project_name: lean
@@ -48,4 +48,3 @@ trainer:
   total_training_steps: null
   logger: ['console']
   seed: 1
-
