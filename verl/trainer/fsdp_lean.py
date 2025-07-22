@@ -181,7 +181,7 @@ class FSDPSFTTrainer:
         if self.config.ulysses_sequence_parallel_size > 1:
             assert self.use_remove_padding, "Sequence parallel is only supported when remove_padding is enabled"
 
-        # This may be very large
+        # This may be very large   
         init_context = get_init_weight_context_manager(use_meta_tensor=not config.tie_word_embeddings, mesh=self.device_mesh)
         
         with init_context():
@@ -193,6 +193,21 @@ class FSDPSFTTrainer:
                 attn_implementation="flash_attention_2",
                 trust_remote_code=trust_remote_code,
             )
+
+            # 调整模型的embedding层大小以匹配新的词汇表
+            model.resize_token_embeddings(len(tokenizer))
+            # 可选：为新token初始化embedding
+            # 获取新添加token的索引
+            new_token_ids = tokenizer.convert_tokens_to_ids(new_tokens)
+            # 使用现有token的平均值初始化新token
+            with torch.no_grad():
+                # 获取embedding权重
+                embeddings = model.get_input_embeddings().weight
+                # 计算现有token的平均embedding
+                avg_embedding = embeddings[:-num_added_tokens].mean(dim=0)
+                # 为新token设置初始embedding
+                for token_id in new_token_ids:
+                    embeddings[token_id] = avg_embedding + torch.randn_like(avg_embedding) * 0.1
 
             if self.use_remove_padding or self.config.ulysses_sequence_parallel_size > 1:
                 from verl.models.transformers.monkey_patch import apply_monkey_patch
@@ -517,7 +532,13 @@ def main(config):
     from verl.utils import hf_tokenizer
 
     local_model_path = copy_to_local(src=config.model.partial_pretrain, verbose=True)
+
+    # 定义要添加的新token
     tokenizer = hf_tokenizer(local_model_path, trust_remote_code=config.model.trust_remote_code)
+    new_tokens = ["<error>", "</error>", "<info>", "</info>"]
+    num_added_tokens = tokenizer.add_tokens(new_tokens)
+    print(f"Added {num_added_tokens} new tokens: {new_tokens}")
+    
     train_dataset = create_sft_dataset(config.data.train_files, config.data, tokenizer)
     val_dataset = create_sft_dataset(config.data.val_files, config.data, tokenizer)
 
