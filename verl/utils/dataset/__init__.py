@@ -16,4 +16,5 @@ from .rl_dataset import RLHFDataset
 from .rm_dataset import RMDataset
 from .sft_dataset import SFTDataset
 from .sft_lean import SFTDataset_LEAN
-__all__ = ["RLHFDataset", "RMDataset", "SFTDataset", "SFTDataset_LEAN"]
+from .sft_value import SFTDataset_VALUE
+__all__ = ["RLHFDataset", "RMDataset", "SFTDataset", "SFTDataset_LEAN", "SFTDataset_VALUE"]
