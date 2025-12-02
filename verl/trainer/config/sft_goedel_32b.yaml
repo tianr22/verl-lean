@@ -1,9 +1,9 @@
 data:
-  train_batch_size: 64
+  train_batch_size: 256
   micro_batch_size: null # will be deprecated, use micro_batch_size_per_gpu
   micro_batch_size_per_gpu: 1  # this is also val batch size
-  train_files: /data2/liguchan/Lean/prover/local/results/goedel_sft_train.jsonl
-  val_files: /data2/liguchan/Lean/prover/local/results/goedel_sft_train.jsonl
+  train_files: /home/fit/wanghn/WORK/tianr/goedel_sft_train.jsonl
+  val_files: /home/fit/wanghn/WORK/tianr/goedel_sft_train.jsonl
   # Multi-turn settings
   multiturn:
     enable: false  # Set to true to use multi-turn dataset
@@ -16,15 +16,15 @@ data:
     path: null
     name: null
 model:
-  partial_pretrain: /data2/liguchan/Lean/prover/local/models/Goedel-Prover-V2-8B
+  partial_pretrain: /home/fit/wanghn/WORK/checkpoints/Goedel-Prover-V2-32B
   fsdp_config:
     wrap_policy:
       min_num_params: 0
     cpu_offload: False
     offload_params: False
   external_lib: null
-  enable_gradient_checkpointing: False
-  trust_remote_code: False
+  enable_gradient_checkpointing: True
+  trust_remote_code: True
   lora_rank: 0  # Set to positive value to enable LoRA (e.g., 32)
   lora_alpha: 16  # LoRA scaling factor
   target_modules: all-linear  # Target modules for LoRA adaptation
@@ -36,14 +36,14 @@ optim:
   warmup_steps_ratio: 0.1
   clip_grad: 1.0
   lr_scheduler: cosine
-ulysses_sequence_parallel_size: 4
+ulysses_sequence_parallel_size: 2
 use_remove_padding: True
 trainer:
-  default_local_dir: /data2/tianrui/checkpoints/goedel/sft_new/
+  default_local_dir: /home/fit/wanghn/WORK/tianr/models/sft/goedel-32b
   default_hdfs_dir: null
   resume_path: null
-  project_name: lean-goedel
-  experiment_name: lean-test-goedel
+  project_name: lean-goedel-32b
+  experiment_name: lean-test-goedel-32b
   total_epochs: 2
   total_training_steps: null
   logger: ['console']

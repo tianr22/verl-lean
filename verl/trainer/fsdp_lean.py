@@ -250,9 +250,10 @@ class FSDPSFTTrainer:
                 attn_implementation="flash_attention_2",
                 trust_remote_code=trust_remote_code,
             )
-
+            
             # 调整模型的embedding层大小以匹配新的词汇表
-            self.model.resize_token_embeddings(len(self.tokenizer))
+            # self.model.resize_token_embeddings(len(self.tokenizer))
+            # we don't need this for kimina-7b/8b, goedel-32b
 
             if (
                 self.use_remove_padding
@@ -643,7 +644,7 @@ class FSDPSFTTrainer:
             self.save_checkpoint(step=global_step)
 
 
-@hydra.main(config_path="config", config_name="sft_lean_goedel", version_base=None)
+@hydra.main(config_path="config", config_name="sft_goedel_32b", version_base=None)
 def main(config):
     local_rank, rank, world_size = initialize_global_process_group()
 
@@ -666,9 +667,15 @@ def main(config):
     tokenizer = hf_tokenizer(
         local_model_path, trust_remote_code=config.model.trust_remote_code
     )
+
+    print("Tokenizer vocab size before resizing:", len(tokenizer))
     new_tokens = ["<error>", "</error>", "<info>", "</info>"]
-    num_added_tokens = tokenizer.add_tokens(new_tokens)
-    print(f"Added {num_added_tokens} new tokens: {new_tokens}")
+    # TODO(TR) add think token for kimina-7b
+    # kimina-8b/goedel-32b has think token already
+    num_added_toks = tokenizer.add_special_tokens(
+        {'additional_special_tokens': new_tokens}
+    )
+    print("Tokenizer vocab size after resizing:", len(tokenizer))
 
     train_dataset = create_sft_dataset(config.data.train_files, config.data, tokenizer)
     val_dataset = create_sft_dataset(config.data.val_files, config.data, tokenizer)
